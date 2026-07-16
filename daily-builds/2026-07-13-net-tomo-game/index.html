@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ネッ友メーカー（1人用体験版） | madai portfolio</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --panel: #171a21;
+    --panel2: #1e222b;
+    --accent: #6ee7b7;
+    --accent2: #f5a3c7;
+    --warn: #f5d76e;
+    --text: #e6e6e6;
+    --sub: #9aa1ac;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+  h1 { font-size: 1.3rem; margin-bottom: 4px; }
+  p.lead { color: var(--sub); font-size: 0.9rem; margin-top: 0; }
+  .notice {
+    background: #2a2110;
+    border: 1px solid #6b5a20;
+    color: #f0d98c;
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  section {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  h2 { font-size: 1rem; margin-top: 0; color: var(--accent); }
+  h3 { font-size: 0.9rem; margin: 12px 0 8px; color: var(--accent2); }
+  .avatar-preview { width: 120px; height: 120px; margin: 0 auto 14px; position: relative; }
+  .face { width: 100px; height: 100px; margin: 10px auto; transition: all 0.2s; }
+  .face.round { border-radius: 50%; }
+  .face.square { border-radius: 18px; }
+  .face.diamond { border-radius: 18px; transform: rotate(45deg); }
+  .eyes { position: relative; top: 34px; display: flex; justify-content: center; gap: 18px; }
+  .face.diamond .eyes { transform: rotate(-45deg); top: 40px; }
+  .eye { width: 10px; height: 10px; background: #10131a; border-radius: 50%; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  button.opt {
+    background: var(--panel2); color: var(--text); border: 1px solid #2c313c;
+    border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; cursor: pointer;
+  }
+  button.opt.active { background: var(--accent); color: #0b0d12; border-color: var(--accent); font-weight: bold; }
+  input[type=text] {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #2c313c;
+    background: var(--panel2); color: var(--text); font-size: 0.95rem; margin-bottom: 10px;
+  }
+  button.big {
+    background: var(--accent); color: #0b0d12; border: none;
+    padding: 12px 20px; border-radius: 10px; font-weight: bold;
+    font-size: 0.95rem; cursor: pointer; width: 100%;
+  }
+  button.big:disabled { background: #384039; color: #6c7570; cursor: not-allowed; }
+  button:focus-visible, input:focus-visible {
+    outline: 3px solid var(--warn); outline-offset: 3px;
+  }
+  .room-wrap { position: relative; }
+  #room-canvas { display: block; width: 100%; border-radius: 10px; background: #10131a; touch-action: none; }
+  .room-hint { text-align: center; font-size: 0.8rem; color: var(--sub); margin-top: 8px; }
+  .talk-btn {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #0b0d12; border: none; border-radius: 20px;
+    padding: 8px 18px; font-weight: bold; font-size: 0.85rem; cursor: pointer;
+  }
+  .dpad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px); gap: 4px; justify-content: center; margin-top: 10px; }
+  .dpad button {
+    background: var(--panel2); border: 1px solid #2c313c; color: var(--text);
+    border-radius: 8px; font-size: 1.1rem; cursor: pointer;
+  }
+  .answer-row {
+    display: flex; justify-content: space-between; background: var(--panel2);
+    border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 0.85rem;
+  }
+  .answer-row.correct { border: 1px solid var(--accent); }
+  .chat-log {
+    max-height: 160px; overflow-y: auto; background: #10131a; border-radius: 8px;
+    padding: 10px; margin: 10px 0; font-size: 0.82rem; transition: box-shadow 0.15s;
+  }
+  .chat-log.flash-good { box-shadow: inset 0 0 0 2px var(--accent); }
+  .chat-log.flash-bad { animation: shakeFail 0.35s; box-shadow: inset 0 0 0 2px #e06565; }
+  .chat-msg { margin-bottom: 6px; }
+  .chat-msg.pop { animation: popIn 0.22s ease; }
+  .chat-msg .who { color: var(--accent2); font-weight: bold; margin-right: 4px; }
+  #step-talk { position: relative; }
+  .heart-pop {
+    position: absolute; top: 6px; right: 10px; font-weight: bold; font-size: 1rem;
+    pointer-events: none; animation: floatUp 0.9s ease forwards;
+  }
+  .heart-pop.good { color: var(--accent); }
+  .heart-pop.bad { color: #e06565; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+  @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-26px); opacity: 0; } }
+  @keyframes shakeFail { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+  @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(110,231,183,0.55); } 50% { box-shadow: 0 0 0 9px rgba(110,231,183,0); } }
+  #enter-hub-btn:not(:disabled) { animation: pulseGlow 1.6s ease-in-out infinite; }
+  .chat-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .chat-input-row input { flex: 1; margin-bottom: 0; }
+  .chat-input-row button {
+    background: var(--panel2); border: 1px solid #2c313c; color: var(--text);
+    border-radius: 8px; padding: 0 14px; cursor: pointer;
+  }
+  .result-card { background: var(--panel2); border-radius: 10px; padding: 16px; text-align: center; }
+  .result-card .name { font-size: 1.1rem; font-weight: bold; color: var(--accent); }
+  .result-card .score { font-size: 2rem; font-weight: bold; margin: 8px 0; }
+  .result-card .reason { color: var(--sub); font-size: 0.85rem; }
+  #result-chat-transcript { text-align: left; margin-top: 12px; }
+  #restart-btn { margin-top: 16px; }
+  .hidden { display: none; }
+  footer { text-align: center; color: var(--sub); font-size: 0.75rem; margin-top: 30px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>ネッ友メーカー（1人用体験版）</h1>
+<p class="lead">アバターを作り、好きなゲームのHubで気になる相手に近づき、3回の本音トークで「気が合いそうな人」を見つける1人用ブラウザゲームです。</p>
+
+<div class="notice">
+  ⚠ この体験版は<strong>実在の他ユーザーとは接続しない1人用</strong>です。Hub内の「今いる人」と発言はすべて架空のキャラクターです。入力した本音は端末内だけで使い、外部へ送信・保存しません。
+</div>
+
+<div id="game-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<section id="step-avatar">
+  <h2>1. アバターを作る</h2>
+  <div class="avatar-preview">
+    <div class="face round" id="face" style="background:#f5c99b;">
+      <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+    </div>
+  </div>
+  <div class="row" id="shape-opts">
+    <button class="opt active" data-shape="round" aria-pressed="true">まる</button>
+    <button class="opt" data-shape="square" aria-pressed="false">しかく</button>
+    <button class="opt" data-shape="diamond" aria-pressed="false">ひし形</button>
+  </div>
+  <div class="row" id="color-opts">
+    <button class="opt active" data-color="#f5c99b" aria-pressed="true">肌色</button>
+    <button class="opt" data-color="#a3d5f5" aria-pressed="false">水色</button>
+    <button class="opt" data-color="#f5a3c7" aria-pressed="false">ピンク</button>
+    <button class="opt" data-color="#c9f5a3" aria-pressed="false">黄緑</button>
+    <button class="opt" data-color="#d5a3f5" aria-pressed="false">紫</button>
+  </div>
+</section>
+
+<section id="step-game">
+  <h2>2. 好きなゲームを教えてください</h2>
+  <label for="game-input" class="sr-only">好きなゲーム名</label>
+  <input type="text" id="game-input" autocomplete="off" placeholder="例: エーペックスレジェンズ、スマブラ、ぷよぷよ、ドラクエ…">
+  <div class="row" id="game-presets">
+    <button class="opt" data-game="エーペックスレジェンズ">エーペックス</button>
+    <button class="opt" data-game="スマブラ">スマブラ</button>
+    <button class="opt" data-game="ぷよぷよ">ぷよぷよ</button>
+    <button class="opt" data-game="ドラゴンクエスト">ドラクエ</button>
+    <button class="opt" data-game="マインクラフト">マイクラ</button>
+  </div>
+  <button class="big" id="enter-hub-btn" disabled>Hubに入る</button>
+</section>
+
+<section id="step-hub" class="hidden">
+  <h2>3. Hub — 気になる相手に自分から近づこう</h2>
+  <h3 id="hub-title"></h3>
+  <p class="lead" id="hub-desc"></p>
+  <div class="room-wrap">
+    <canvas id="room-canvas" width="560" height="320" role="img" aria-label="自分のアバターと話せる相手がいるHub。方向キーまたは下の方向ボタンで移動します"></canvas>
+    <button class="talk-btn hidden" id="talk-btn">話しかける</button>
+  </div>
+  <div class="dpad">
+    <span></span><button data-dir="up" aria-label="上へ移動">↑</button><span></span>
+    <button data-dir="left" aria-label="左へ移動">←</button><span></span><button data-dir="right" aria-label="右へ移動">→</button>
+    <span></span><button data-dir="down" aria-label="下へ移動">↓</button><span></span>
+  </div>
+  <p class="room-hint">矢印キー/WASD、またはボタンでアバターを動かせます。名前の下のアイコンは相手のタイプのヒント、ハートは今の仲良し度です。誰に近づくかで展開が変わります。</p>
+  <button class="big hidden" id="view-result-btn">ここまでの結果を見る</button>
+</section>
+
+<section id="step-talk" class="hidden">
+  <h2 id="talk-title">4. 話しかける</h2>
+  <p class="lead">クイズの正解不正解ではなく、相手の本音に自分の返し方を合わせられるかで仲良し度が変わります。読み違えると気まずくなることもある、本音のやり取りです。</p>
+  <div class="chat-log" id="chat-log"></div>
+  <div id="talk-options" class="row"></div>
+</section>
+
+<section id="step-result" class="hidden">
+  <h2>結果</h2>
+  <div class="result-card">
+    <div class="name" id="result-name"></div>
+    <div class="score" id="result-score"></div>
+    <div class="reason" id="result-reason"></div>
+    <div id="result-chat-transcript"></div>
+    <button class="big" id="restart-btn">最初から遊び直す</button>
+  </div>
+</section>
+
+<footer>madai portfolio — self-made browser demo</footer>
+
+<script>
+const GENRES = [
+  { key: "fps", label: "FPS/バトロワ", match: ["エーペックス","apex","フォートナイト","fortnite","valorant","バトロワ","fps","コールオブデューティ","cod"] },
+  { key: "fighting", label: "格闘ゲーム", match: ["スマブラ","スマッシュ","スト","ストリートファイター","鉄拳","kof","格闘"] },
+  { key: "puzzle", label: "パズル/カジュアル", match: ["ぷよぷよ","テトリス","tetris","パズル","キャンディークラッシュ"] },
+  { key: "rpg", label: "RPG", match: ["ドラゴンクエスト","ドラクエ","ファイナルファンタジー","ff","ポケモン","rpg"] },
+  { key: "sandbox", label: "サンドボックス/クラフト", match: ["マインクラフト","マイクラ","minecraft","フォートナイト build","テラリア"] },
+];
+const HUB_MEMBERS = {
+  fps: [
+    { name: "りく(21)", game: "エーペックスレジェンズ", comment: "同じ立ち回り重視タイプ、デュオ組みたくなりそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+    { name: "あおい(23)", game: "VALORANT", comment: "FPS繋がりで武器の好みトークが弾みそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
+  ],
+  fighting: [
+    { name: "しょう(20)", game: "スマブラ", comment: "対戦後の感想戦で盛り上がれそう", style: "share", hint: "💬自分から話すの好きそう" },
+    { name: "かえで(25)", game: "鉄拳", comment: "格ゲー好き同士、大会の話で意気投合しそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+  ],
+  puzzle: [
+    { name: "みお(19)", game: "ぷよぷよ", comment: "連鎖の組み方談義ができそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
+    { name: "はると(22)", game: "テトリス", comment: "スコアアタック好き同士、記録の話で盛り上がりそう", style: "share", hint: "💬自分から話すの好きそう" },
+  ],
+  rpg: [
+    { name: "つばさ(24)", game: "ドラゴンクエスト", comment: "パーティ編成の好みが合いそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+    { name: "ゆずき(18)", game: "ポケモン", comment: "育成論トークが弾みそう", style: "share", hint: "💬自分から話すの好きそう" },
+  ],
+  sandbox: [
+    { name: "こはる(20)", game: "マインクラフト", comment: "一緒にワールドを作りたくなりそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
+    { name: "だいち(26)", game: "テラリア", comment: "探索・建築どちらも語れそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+  ],
+  other: [
+    { name: "みなと(22)", game: "いろいろ遊ぶ", comment: "幅広いジャンルで話が合いそう", style: "share", hint: "💬自分から話すの好きそう" },
+  ],
+};
+// 各ジャンル3段階の自己開示(1: 軽い本音 → 2: ちょっとした弱音 → 3: 本当の気持ち)。
+// 5日目: クイズの正解/不正解ではなく、この本音への返し方の相性で仲良し度を決める設計に変更。
+const DISCLOSURES = {
+  fps: [
+    "正直、撃ち合いはそこそこ得意な方なんだけど、味方運が悪いと結構イライラしちゃうタイプで",
+    "実はランクが上がれば上がるほど、楽しさより緊張の方が勝ってきてて、ちょっとしんどい時あるんだよね",
+    "でもこうやって一緒に遊べる人がいると、また明日も頑張ろうって思えるんだ",
+  ],
+  fighting: [
+    "対戦するとつい熱くなっちゃうんだけど、負けが込むと結構凹むタイプで",
+    "実は大会に出てみたい気持ちはあるけど、下手なとこ見られるのが怖くてまだ言い出せてなくて",
+    "でも今日みたいに気軽に話せる相手がいると、挑戦してみようかなって気持ちになれる",
+  ],
+  puzzle: [
+    "パズルはコツコツ系だから性格出るよね、私はわりと慎重に積むタイプ",
+    "実はスコアが伸び悩んでて、最近ちょっと飽きられてないか自分で不安になることがある",
+    "でも誰かと記録の話で盛り上がれると、また続けたいなって単純に思えるんだ",
+  ],
+  rpg: [
+    "パーティ編成考えてる時が一番好きで、つい時間忘れちゃうんだよね",
+    "実は一人でやってるとエンディングの後、ちょっと寂しくなることがあって",
+    "だから同じ話で盛り上がれる人がいると、それだけで結構救われる気がする",
+  ],
+  sandbox: [
+    "建築系はこだわりだすと止まらなくて、気づいたら夜中になってることが多い",
+    "実は一人で黙々と作ってると、これ見せる相手いないなってふと寂しくなる時があって",
+    "だから今日みたいに感想言い合える相手がいると、作る楽しさが倍になる気がする",
+  ],
+  other: [
+    "色々遊ぶタイプなんだけど、実は一つのゲームにハマりきれない自分に少しコンプレックスがあって",
+    "実況とか見てるのも好きだけど、自分でやるとなると緊張しちゃうタイプで",
+    "でも今日話せて、意外と気楽に遊べばいいんだって思えた気がする",
+  ],
+};
+// 返しの選択肢: 共感/質問は安全(ミスマッチでも小さく加点)、shareは実際に文章を書く踏み込みで
+// ハイリスク・ハイリターン(桜井メソッド: リスクとリターン)
+const RESPONSE_OPTIONS = [
+  { style: "empathy", label: "共感する", line: "わかる、それあるある〜" },
+  { style: "curious", label: "聞いてみる", line: "それってどんな時が多いの?" },
+  { style: "share", label: "自分の本音を打ち明ける(勇気がいる)", line: null },
+];
+
+let state = { shape: "round", color: "#f5c99b", game: "", genreKey: "other" };
+
+document.querySelectorAll("#shape-opts .opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#shape-opts .opt").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
+    btn.classList.add("active");
+    btn.setAttribute("aria-pressed", "true");
+    state.shape = btn.dataset.shape;
+    document.getElementById("face").className = "face " + state.shape;
+  });
+});
+document.querySelectorAll("#color-opts .opt").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("#color-opts .opt").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
+    btn.classList.add("active");
+    btn.setAttribute("aria-pressed", "true");
+    state.color = btn.dataset.color;
+    document.getElementById("face").style.background = state.color;
+  });
+});
+
+const gameInput = document.getElementById("game-input");
+const enterHubBtn = document.getElementById("enter-hub-btn");
+function setGame(val) {
+  gameInput.value = val;
+  state.game = val;
+  enterHubBtn.disabled = val.trim().length === 0;
+}
+gameInput.addEventListener("input", () => setGame(gameInput.value));
+document.querySelectorAll("#game-presets .opt").forEach(btn => {
+  btn.addEventListener("click", () => setGame(btn.dataset.game));
+});
+
+function detectGenre(text) {
+  const t = text.toLowerCase();
+  for (const g of GENRES) {
+    if (g.match.some(m => t.includes(m.toLowerCase()))) return g;
+  }
+  return { key: "other", label: "いろいろなゲーム" };
+}
+
+// --- Hub room: 実際にアバターを動かす(2026-07-13 3日目) ---
+const ROOM_W = 560, ROOM_H = 320, AVATAR_R = 16, TALK_DIST = 46;
+const GENRE_BG = { fps: "#241417", fighting: "#241820", puzzle: "#142418", rpg: "#1e1a24", sandbox: "#182418", other: "#181c24" };
+let room = { player: { x: 60, y: 160 }, npcs: [], nearNpc: null, keys: {} };
+let roomLoopRunning = false;
+const canvas = document.getElementById("room-canvas");
+const ctx = canvas.getContext("2d");
+const talkBtn = document.getElementById("talk-btn");
+
+function layoutNpcs(list) {
+  const spacing = ROOM_W / (list.length + 1);
+  return list.map((m, i) => ({ ...m, x: spacing * (i + 1), y: 120 + (i % 2) * 80, heart: 0, stage: 0, completed: false, chatHistory: [] }));
+}
+
+function heartsLabel(n) {
+  const filled = Math.max(0, Math.min(5, Math.round(n / 2)));
+  return "♥".repeat(filled) + "♡".repeat(5 - filled);
+}
+
+function drawShape(x, y, shape, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (shape === "round") { ctx.arc(x, y, AVATAR_R, 0, Math.PI * 2); }
+  else if (shape === "square") { ctx.rect(x - AVATAR_R, y - AVATAR_R, AVATAR_R * 2, AVATAR_R * 2); }
+  else { ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.rect(-AVATAR_R, -AVATAR_R, AVATAR_R * 2, AVATAR_R * 2); ctx.restore(); }
+  ctx.fill();
+  ctx.fillStyle = "#10131a";
+  ctx.beginPath(); ctx.arc(x - 5, y - 3, 2, 0, Math.PI * 2); ctx.arc(x + 5, y - 3, 2, 0, Math.PI * 2); ctx.fill();
+}
+
+function roomLoop() {
+  ctx.fillStyle = GENRE_BG[state.genreKey] || GENRE_BG.other;
+  ctx.fillRect(0, 0, ROOM_W, ROOM_H);
+
+  if (!room.paused) {
+    const speed = 3;
+    if (room.keys["up"]) room.player.y -= speed;
+    if (room.keys["down"]) room.player.y += speed;
+    if (room.keys["left"]) room.player.x -= speed;
+    if (room.keys["right"]) room.player.x += speed;
+    room.player.x = Math.max(AVATAR_R, Math.min(ROOM_W - AVATAR_R, room.player.x));
+    room.player.y = Math.max(AVATAR_R, Math.min(ROOM_H - AVATAR_R, room.player.y));
+
+    room.nearNpc = null;
+    room.npcs.forEach(n => {
+      const dist = Math.hypot(n.x - room.player.x, n.y - room.player.y);
+      if (dist < TALK_DIST) room.nearNpc = n;
+    });
+  }
+
+  room.npcs.forEach(n => {
+    const isNear = n === room.nearNpc;
+    if (isNear) { ctx.save(); ctx.shadowColor = "#6ee7b7"; ctx.shadowBlur = 16; }
+    drawShape(n.x, n.y, "round", "#f5a3c7");
+    if (isNear) ctx.restore();
+    ctx.fillStyle = "#e6e6e6"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(n.name, n.x, n.y + AVATAR_R + 14);
+    ctx.fillStyle = "#9aa1ac"; ctx.font = "10px sans-serif";
+    ctx.fillText(n.game, n.x, n.y + AVATAR_R + 26);
+    ctx.fillStyle = "#f5a3c7"; ctx.font = "10px sans-serif";
+    ctx.fillText(heartsLabel(n.heart), n.x, n.y + AVATAR_R + 39);
+  });
+
+  drawShape(room.player.x, room.player.y, state.shape, state.color);
+  talkBtn.classList.toggle("hidden", !room.nearNpc || room.paused);
+
+  if (roomLoopRunning) requestAnimationFrame(roomLoop);
+}
+
+const KEY_MAP = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
+window.addEventListener("keydown", (e) => {
+  if (!KEY_MAP[e.key]) return;
+  room.keys[KEY_MAP[e.key]] = true;
+  if (!document.getElementById("step-hub").classList.contains("hidden") && !room.paused) e.preventDefault();
+});
+window.addEventListener("keyup", (e) => { if (KEY_MAP[e.key]) room.keys[KEY_MAP[e.key]] = false; });
+window.addEventListener("blur", () => { room.keys = {}; });
+document.querySelectorAll(".dpad button[data-dir]").forEach(btn => {
+  const dir = btn.dataset.dir;
+  const press = (e) => { e.preventDefault(); room.keys[dir] = true; btn.setPointerCapture?.(e.pointerId); };
+  const release = () => room.keys[dir] = false;
+  btn.addEventListener("pointerdown", press);
+  btn.addEventListener("pointerup", release);
+  btn.addEventListener("pointercancel", release);
+  btn.addEventListener("lostpointercapture", release);
+});
+
+talkBtn.addEventListener("click", () => {
+  if (!room.nearNpc || room.paused) return;
+  startTalk(room.nearNpc);
+});
+
+enterHubBtn.addEventListener("click", () => {
+  const genre = detectGenre(state.game);
+  state.genreKey = genre.key;
+  document.getElementById("hub-title").textContent = genre.label + " Hub";
+  document.getElementById("hub-desc").textContent = `「${state.game}」で入室しました。気になる相手に近づいて「話しかける」を押すと、その人だけの会話が始まります。`;
+  room.npcs = layoutNpcs(HUB_MEMBERS[genre.key] || HUB_MEMBERS.other);
+  room.player = { x: 60, y: ROOM_H / 2 };
+  room.paused = false;
+  document.getElementById("step-talk").classList.add("hidden");
+  document.getElementById("step-result").classList.add("hidden");
+  document.getElementById("view-result-btn").classList.add("hidden");
+  document.getElementById("step-hub").classList.remove("hidden");
+  document.getElementById("step-hub").scrollIntoView({ behavior: "smooth" });
+  if (!roomLoopRunning) { roomLoopRunning = true; roomLoop(); }
+});
+
+// --- 話しかける(2026-07-14 5日目): クイズの正解/不正解ではなく、相手の本音(自己開示)に
+// こちらの返し方を合わせられるかで仲良し度が変わる。桜井メソッド「リスクとリターン」を適用:
+// 共感/質問は安全(ミスマッチでも小さく加点)、自分の本音を打ち明ける「share」は
+// プレイヤーが実際に文章を書く高リスク高リターン(刺されば+3、外すと-1で気まずくなる)。
+function talkDisclosures() { return DISCLOSURES[state.genreKey] || DISCLOSURES.other; }
+
+function renderTalkChat(npc) {
+  const log = document.getElementById("chat-log");
+  log.replaceChildren(...npc.chatHistory.map(m => createChatMessage(m.name, m.text)));
+  log.scrollTop = log.scrollHeight;
+}
+
+function createChatMessage(name, message) {
+  const div = document.createElement("div");
+  div.className = "chat-msg";
+  const who = document.createElement("span");
+  who.className = "who";
+  who.textContent = name + ":";
+  div.append(who, document.createTextNode(message));
+  return div;
+}
+
+function pushTalkChat(npc, name, text) {
+  npc.chatHistory.push({ name, text });
+  renderTalkChat(npc);
+  const log = document.getElementById("chat-log");
+  if (log.lastElementChild) log.lastElementChild.classList.add("pop");
+}
+
+// 手応えの演出(桜井メソッド9): 仲良し度が動いた瞬間を視覚的に返す。
+// share(高リスク高リターン)は成功/失敗で枠の色を変え、それ以外より強めに演出する。
+function showHeartPop(text, good) {
+  const wrap = document.getElementById("step-talk");
+  const pop = document.createElement("div");
+  pop.className = "heart-pop " + (good ? "good" : "bad");
+  pop.textContent = text;
+  wrap.appendChild(pop);
+  const status = document.getElementById("game-status");
+  const amount = Number(text.replace(/[^\d-]/g, ""));
+  status.textContent = "";
+  setTimeout(() => {
+    status.textContent = amount >= 0
+      ? `仲良し度が${amount}増えました`
+      : `仲良し度が${Math.abs(amount)}減りました`;
+  }, 0);
+  setTimeout(() => pop.remove(), 900);
+}
+
+function startTalk(npc) {
+  room.paused = true;
+  document.getElementById("talk-title").textContent = `4. ${npc.name}と話す`;
+  document.getElementById("step-talk").classList.remove("hidden");
+  document.getElementById("step-talk").scrollIntoView({ behavior: "smooth" });
+  renderTalkChat(npc);
+  advanceTalk(npc);
+}
+
+function backToHub() {
+  document.getElementById("step-talk").classList.add("hidden");
+  room.paused = false;
+  document.getElementById("step-hub").scrollIntoView({ behavior: "smooth" });
+}
+
+function advanceTalk(npc) {
+  const disclosures = talkDisclosures();
+  const optsDiv = document.getElementById("talk-options");
+  optsDiv.innerHTML = "";
+  if (npc.stage >= disclosures.length) {
+    if (!npc.completed) {
+      pushTalkChat(npc, npc.name, npc.heart >= 6 ? "今日話せて良かった、また一緒に遊ぼうね" : "話せて良かった、またね");
+      npc.completed = true;
+      updateResultButton();
+    }
+    const backBtn = document.createElement("button");
+    backBtn.className = "big";
+    backBtn.textContent = "Hubに戻る";
+    backBtn.addEventListener("click", backToHub);
+    optsDiv.appendChild(backBtn);
+    return;
+  }
+  pushTalkChat(npc, npc.name, disclosures[npc.stage]);
+  RESPONSE_OPTIONS.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "opt";
+    btn.textContent = opt.label;
+    btn.addEventListener("click", () => handleResponse(npc, opt));
+    optsDiv.appendChild(btn);
+  });
+}
+
+function matchReply(style) {
+  if (style === "empathy") return "だよね、わかってもらえると安心する";
+  if (style === "curious") return "聞いてくれるの嬉しい、実はね…";
+  return "うん、そうそう";
+}
+
+function handleResponse(npc, opt) {
+  if (opt.style === "share") { openShareInput(npc); return; }
+  document.getElementById("talk-options").innerHTML = "";
+  pushTalkChat(npc, "あなた", opt.line);
+  const match = opt.style === npc.style;
+  const gain = match ? 2 : 1;
+  npc.heart += gain;
+  showHeartPop("+" + gain + "♥", true);
+  setTimeout(() => {
+    pushTalkChat(npc, npc.name, match ? matchReply(opt.style) : "うん、そうだね");
+    npc.stage++;
+    setTimeout(() => advanceTalk(npc), 500);
+  }, 400);
+}
+
+function openShareInput(npc) {
+  const optsDiv = document.getElementById("talk-options");
+  optsDiv.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.className = "chat-input-row";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "自分の本音を書いてみる…(勇気がいる分、刺さればぐっと仲良くなれる)";
+  const sendBtn = document.createElement("button");
+  sendBtn.textContent = "送る";
+  sendBtn.disabled = true;
+  input.addEventListener("input", () => { sendBtn.disabled = input.value.trim().length === 0; });
+  const send = () => { if (input.value.trim()) submitShare(npc, input.value.trim()); };
+  sendBtn.addEventListener("click", send);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+  wrap.appendChild(input);
+  wrap.appendChild(sendBtn);
+  optsDiv.appendChild(wrap);
+  input.focus();
+}
+
+function submitShare(npc, text) {
+  document.getElementById("talk-options").innerHTML = "";
+  pushTalkChat(npc, "あなた", text);
+  const match = npc.style === "share";
+  const log = document.getElementById("chat-log");
+  setTimeout(() => {
+    if (match) {
+      npc.heart += 3;
+      showHeartPop("+3♥", true);
+      log.classList.add("flash-good");
+      pushTalkChat(npc, npc.name, "え、それ自分も思ってた…同じこと考えてたんだ、なんか嬉しい");
+    } else {
+      npc.heart = Math.max(0, npc.heart - 1);
+      showHeartPop("-1♥", false);
+      log.classList.add("flash-bad");
+      pushTalkChat(npc, npc.name, "あ…うん、そうなんだ(ちょっと反応に困った空気)");
+    }
+    setTimeout(() => log.classList.remove("flash-good", "flash-bad"), 400);
+    npc.stage++;
+    setTimeout(() => advanceTalk(npc), 600);
+  }, 400);
+}
+
+document.getElementById("view-result-btn").addEventListener("click", showResult);
+document.getElementById("restart-btn").addEventListener("click", restartGame);
+
+function updateResultButton() {
+  const completed = room.npcs.filter(n => n.completed);
+  document.getElementById("view-result-btn").classList.toggle("hidden", completed.length === 0);
+}
+
+function showResult() {
+  const disclosures = talkDisclosures();
+  const completed = room.npcs.filter(n => n.completed);
+  if (!completed.length) return;
+  const best = completed.reduce((a, b) => (b.heart > a.heart ? b : a));
+  const maxHeart = disclosures.length * 3;
+  const compat = Math.max(30, Math.min(99, Math.round((best.heart / maxHeart) * 100)));
+  document.getElementById("result-name").textContent = best.name;
+  document.getElementById("result-score").textContent = compat + "%";
+  document.getElementById("result-reason").textContent =
+    `${heartsLabel(best.heart)}(仲良し度${best.heart}) — ${best.comment}`;
+  const transcriptDiv = document.getElementById("result-chat-transcript");
+  const transcriptTitle = document.createElement("h3");
+  transcriptTitle.textContent = "チャットの様子";
+  transcriptDiv.replaceChildren(transcriptTitle, ...best.chatHistory.map(c => createChatMessage(c.name, c.text)));
+  document.getElementById("step-result").classList.remove("hidden");
+  document.getElementById("step-result").scrollIntoView({ behavior: "smooth" });
+}
+
+function restartGame() {
+  room.paused = true;
+  room.keys = {};
+  room.nearNpc = null;
+  room.npcs = [];
+  state.game = "";
+  state.genreKey = "other";
+  gameInput.value = "";
+  enterHubBtn.disabled = true;
+  document.getElementById("step-hub").classList.add("hidden");
+  document.getElementById("step-talk").classList.add("hidden");
+  document.getElementById("step-result").classList.add("hidden");
+  document.getElementById("view-result-btn").classList.add("hidden");
+  document.getElementById("chat-log").replaceChildren();
+  document.getElementById("talk-options").replaceChildren();
+  document.getElementById("game-status").textContent = "最初から遊び直せます";
+  document.getElementById("step-avatar").scrollIntoView({ behavior: "smooth" });
+  gameInput.focus({ preventScroll: true });
+}
+</script>
+
+</body>
+</html>
