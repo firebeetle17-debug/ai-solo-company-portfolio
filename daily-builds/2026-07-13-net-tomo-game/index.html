@@ -137,89 +137,128 @@
     }
   }
 </style>
+<link rel="stylesheet" href="game-v2.css">
 </head>
 <body>
+<a class="skip-link" href="#game-main">ゲーム設定へ移動</a>
 
-<h1>ネッ友メーカー（1人用体験版）</h1>
-<p class="lead">アバターを作り、好きなゲームのHubで気になる相手に近づき、3回の本音トークで「気が合いそうな人」を見つける1人用ブラウザゲームです。</p>
+<header class="game-header">
+  <a class="back-link" href="../../" aria-label="madaiポートフォリオへ戻る">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+    <span>PORTFOLIO</span>
+  </a>
+  <p class="game-mark">NET / TOMO <sup>01</sup></p>
+  <p class="privacy-status"><span aria-hidden="true"></span>LOCAL PLAY</p>
+</header>
 
-<div class="notice">
-  ⚠ この体験版は<strong>実在の他ユーザーとは接続しない1人用</strong>です。Hub内の「今いる人」と発言はすべて架空のキャラクターです。入力した本音は端末内だけで使い、外部へ送信・保存しません。
-</div>
-
-<div id="game-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
-
-<section id="step-avatar">
-  <h2>1. アバターを作る</h2>
-  <div class="avatar-preview">
-    <div class="face round" id="face" style="background:#f5c99b;">
-      <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+<main id="game-main" class="game-shell">
+  <section class="game-intro" aria-labelledby="game-title">
+    <div>
+      <p class="kicker">ONE PLAYER SOCIAL SIMULATION</p>
+      <h1 id="game-title"><span>ネッ友</span><span>メーカー</span></h1>
     </div>
-  </div>
-  <div class="row" id="shape-opts">
-    <button class="opt active" data-shape="round" aria-pressed="true">まる</button>
-    <button class="opt" data-shape="square" aria-pressed="false">しかく</button>
-    <button class="opt" data-shape="diamond" aria-pressed="false">ひし形</button>
-  </div>
-  <div class="row" id="color-opts">
-    <button class="opt active" data-color="#f5c99b" aria-pressed="true">肌色</button>
-    <button class="opt" data-color="#a3d5f5" aria-pressed="false">水色</button>
-    <button class="opt" data-color="#f5a3c7" aria-pressed="false">ピンク</button>
-    <button class="opt" data-color="#c9f5a3" aria-pressed="false">黄緑</button>
-    <button class="opt" data-color="#d5a3f5" aria-pressed="false">紫</button>
-  </div>
-</section>
+    <p class="intro-copy">好きなゲームをきっかけに、架空の誰かと少しずつ話す。返し方で距離が変わる、1人用の会話ゲームです。</p>
+  </section>
 
-<section id="step-game">
-  <h2>2. 好きなゲームを教えてください</h2>
-  <label for="game-input" class="sr-only">好きなゲーム名</label>
-  <input type="text" id="game-input" autocomplete="off" placeholder="例: エーペックスレジェンズ、スマブラ、ぷよぷよ、ドラクエ…">
-  <div class="row" id="game-presets">
-    <button class="opt" data-game="エーペックスレジェンズ">エーペックス</button>
-    <button class="opt" data-game="スマブラ">スマブラ</button>
-    <button class="opt" data-game="ぷよぷよ">ぷよぷよ</button>
-    <button class="opt" data-game="ドラゴンクエスト">ドラクエ</button>
-    <button class="opt" data-game="マインクラフト">マイクラ</button>
+  <div class="safety-note" role="note">
+    <span class="safety-index">SAFE / 01</span>
+    <p><strong>実在の利用者とは接続しません。</strong>登場人物と発言はすべて架空です。入力内容は外部へ送信・保存されません。</p>
   </div>
-  <button class="big" id="enter-hub-btn" disabled>Hubに入る</button>
-</section>
 
-<section id="step-hub" class="hidden">
-  <h2>3. Hub — 気になる相手に自分から近づこう</h2>
-  <h3 id="hub-title"></h3>
-  <p class="lead" id="hub-desc"></p>
-  <div class="room-wrap">
-    <canvas id="room-canvas" width="560" height="320" role="img" aria-label="自分のアバターと話せる相手がいるHub。方向キーまたは下の方向ボタンで移動します"></canvas>
-    <button class="talk-btn hidden" id="talk-btn">話しかける</button>
+  <ol class="progress-rail" aria-label="ゲームの進行状況">
+    <li class="is-current" data-progress="setup"><span>01</span>SET UP</li>
+    <li data-progress="hub"><span>02</span>HUB</li>
+    <li data-progress="talk"><span>03</span>TALK</li>
+    <li data-progress="result"><span>04</span>RESULT</li>
+  </ol>
+
+  <div id="game-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <div class="setup-grid">
+    <section id="step-avatar" class="game-panel avatar-panel">
+      <div class="panel-heading"><span>01</span><div><p>YOUR LOOK</p><h2>アバターをつくる</h2></div></div>
+      <div class="avatar-stage">
+        <div class="avatar-preview">
+          <div class="face round" id="face" style="background:#f5c99b;">
+            <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+          </div>
+        </div>
+        <span class="avatar-shadow" aria-hidden="true"></span>
+      </div>
+      <fieldset>
+        <legend>かたち</legend>
+        <div class="row" id="shape-opts">
+          <button class="opt active" data-shape="round" aria-pressed="true">まる</button>
+          <button class="opt" data-shape="square" aria-pressed="false">しかく</button>
+          <button class="opt" data-shape="diamond" aria-pressed="false">ひし形</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>カラー</legend>
+        <div class="row color-row" id="color-opts">
+          <button class="opt active" data-color="#f5c99b" aria-pressed="true"><i style="--swatch:#f5c99b"></i>サンド</button>
+          <button class="opt" data-color="#a3d5f5" aria-pressed="false"><i style="--swatch:#a3d5f5"></i>スカイ</button>
+          <button class="opt" data-color="#f5a3c7" aria-pressed="false"><i style="--swatch:#f5a3c7"></i>ピンク</button>
+          <button class="opt" data-color="#c9f5a3" aria-pressed="false"><i style="--swatch:#c9f5a3"></i>ライム</button>
+          <button class="opt" data-color="#d5a3f5" aria-pressed="false"><i style="--swatch:#d5a3f5"></i>ラベンダー</button>
+        </div>
+      </fieldset>
+    </section>
+
+    <section id="step-game" class="game-panel game-choice-panel">
+      <div class="panel-heading"><span>02</span><div><p>YOUR GAME</p><h2>好きなゲームを選ぶ</h2></div></div>
+      <label for="game-input">ゲーム名</label>
+      <input type="text" id="game-input" autocomplete="off" placeholder="ゲーム名を入力">
+      <p class="input-help">入力内容から、雰囲気の近いHubを選びます。</p>
+      <div class="row preset-row" id="game-presets" aria-label="ゲーム名の候補">
+        <button class="opt" data-game="エーペックスレジェンズ">エーペックス</button>
+        <button class="opt" data-game="スマブラ">スマブラ</button>
+        <button class="opt" data-game="ぷよぷよ">ぷよぷよ</button>
+        <button class="opt" data-game="ドラゴンクエスト">ドラクエ</button>
+        <button class="opt" data-game="マインクラフト">マイクラ</button>
+      </div>
+      <button class="big" id="enter-hub-btn" disabled><span>Hubへ進む</span><span aria-hidden="true">↗</span></button>
+    </section>
   </div>
-  <div class="dpad">
-    <span></span><button data-dir="up" aria-label="上へ移動">↑</button><span></span>
-    <button data-dir="left" aria-label="左へ移動">←</button><span></span><button data-dir="right" aria-label="右へ移動">→</button>
-    <span></span><button data-dir="down" aria-label="下へ移動">↓</button><span></span>
-  </div>
-  <p class="room-hint">矢印キー/WASD、またはボタンでアバターを動かせます。名前の下のアイコンは相手のタイプのヒント、ハートは今の仲良し度です。誰に近づくかで展開が変わります。</p>
-  <button class="big hidden" id="view-result-btn">ここまでの結果を見る</button>
-</section>
 
-<section id="step-talk" class="hidden">
-  <h2 id="talk-title">4. 話しかける</h2>
-  <p class="lead">クイズの正解不正解ではなく、相手の本音に自分の返し方を合わせられるかで仲良し度が変わります。読み違えると気まずくなることもある、本音のやり取りです。</p>
-  <div class="chat-log" id="chat-log"></div>
-  <div id="talk-options" class="row"></div>
-</section>
+  <section id="step-hub" class="game-panel hub-panel hidden">
+    <div class="panel-heading"><span>03</span><div><p>MEET SOMEONE</p><h2>気になる相手に近づく</h2></div></div>
+    <div class="hub-copy"><div><h3 id="hub-title"></h3><p class="lead" id="hub-desc"></p></div><p class="control-note">KEYBOARD / WASD</p></div>
+    <div class="room-wrap">
+      <canvas id="room-canvas" width="560" height="320" role="img" aria-label="自分のアバターと話せる相手がいるHub。方向キーまたは下の方向ボタンで移動します"></canvas>
+      <button class="talk-btn hidden" id="talk-btn">話しかける</button>
+    </div>
+    <div class="hub-controls">
+      <div class="dpad" aria-label="移動ボタン">
+        <span></span><button data-dir="up" aria-label="上へ移動"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6"/></svg></button><span></span>
+        <button data-dir="left" aria-label="左へ移動"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button><span class="dpad-core"></span><button data-dir="right" aria-label="右へ移動"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+        <span></span><button data-dir="down" aria-label="下へ移動"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m6-6-6 6-6-6"/></svg></button><span></span>
+      </div>
+      <p class="room-hint">相手に近づくと会話ボタンが現れます。ハートは現在の仲良し度です。</p>
+      <button class="big secondary-action hidden" id="view-result-btn">ここまでの結果を見る</button>
+    </div>
+  </section>
 
-<section id="step-result" class="hidden">
-  <h2>結果</h2>
-  <div class="result-card">
-    <div class="name" id="result-name"></div>
-    <div class="score" id="result-score"></div>
-    <div class="reason" id="result-reason"></div>
-    <div id="result-chat-transcript"></div>
-    <button class="big" id="restart-btn">最初から遊び直す</button>
-  </div>
-</section>
+  <section id="step-talk" class="game-panel talk-panel hidden">
+    <div class="panel-heading"><span>04</span><div><p>CHOOSE YOUR REPLY</p><h2 id="talk-title">話しかける</h2></div></div>
+    <p class="lead">正解を当てるゲームではありません。相手の言葉を読み、返し方を選びます。</p>
+    <div class="chat-log" id="chat-log"></div>
+    <div id="talk-options" class="row talk-options"></div>
+  </section>
 
-<footer>madai portfolio — self-made browser demo</footer>
+  <section id="step-result" class="game-panel result-panel hidden">
+    <div class="panel-heading"><span>05</span><div><p>YOUR MATCH</p><h2>今回、気が合った人</h2></div></div>
+    <div class="result-card">
+      <div class="name" id="result-name"></div>
+      <div class="score" id="result-score"></div>
+      <div class="reason" id="result-reason"></div>
+      <div id="result-chat-transcript"></div>
+      <button class="big" id="restart-btn">最初から遊び直す</button>
+    </div>
+  </section>
+</main>
+
+<footer class="game-footer"><span>MADAI / SELF-INITIATED DEMO</span><span>HTML / CSS / JAVASCRIPT</span></footer>
 
 <script>
 const GENRES = [
@@ -231,27 +270,27 @@ const GENRES = [
 ];
 const HUB_MEMBERS = {
   fps: [
-    { name: "りく(21)", game: "エーペックスレジェンズ", comment: "同じ立ち回り重視タイプ、デュオ組みたくなりそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
-    { name: "あおい(23)", game: "VALORANT", comment: "FPS繋がりで武器の好みトークが弾みそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
+    { name: "りく(21)", game: "エーペックスレジェンズ", comment: "同じ立ち回り重視タイプ、デュオ組みたくなりそう", style: "empathy", hint: "聞いてほしいタイプ" },
+    { name: "あおい(23)", game: "VALORANT", comment: "FPS繋がりで武器の好みトークが弾みそう", style: "curious", hint: "質問されると嬉しいタイプ" },
   ],
   fighting: [
-    { name: "しょう(20)", game: "スマブラ", comment: "対戦後の感想戦で盛り上がれそう", style: "share", hint: "💬自分から話すの好きそう" },
-    { name: "かえで(25)", game: "鉄拳", comment: "格ゲー好き同士、大会の話で意気投合しそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+    { name: "しょう(20)", game: "スマブラ", comment: "対戦後の感想戦で盛り上がれそう", style: "share", hint: "自分から話すのが好きなタイプ" },
+    { name: "かえで(25)", game: "鉄拳", comment: "格ゲー好き同士、大会の話で意気投合しそう", style: "empathy", hint: "聞いてほしいタイプ" },
   ],
   puzzle: [
-    { name: "みお(19)", game: "ぷよぷよ", comment: "連鎖の組み方談義ができそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
-    { name: "はると(22)", game: "テトリス", comment: "スコアアタック好き同士、記録の話で盛り上がりそう", style: "share", hint: "💬自分から話すの好きそう" },
+    { name: "みお(19)", game: "ぷよぷよ", comment: "連鎖の組み方談義ができそう", style: "curious", hint: "質問されると嬉しいタイプ" },
+    { name: "はると(22)", game: "テトリス", comment: "スコアアタック好き同士、記録の話で盛り上がりそう", style: "share", hint: "自分から話すのが好きなタイプ" },
   ],
   rpg: [
-    { name: "つばさ(24)", game: "ドラゴンクエスト", comment: "パーティ編成の好みが合いそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
-    { name: "ゆずき(18)", game: "ポケモン", comment: "育成論トークが弾みそう", style: "share", hint: "💬自分から話すの好きそう" },
+    { name: "つばさ(24)", game: "ドラゴンクエスト", comment: "パーティ編成の好みが合いそう", style: "empathy", hint: "聞いてほしいタイプ" },
+    { name: "ゆずき(18)", game: "ポケモン", comment: "育成論トークが弾みそう", style: "share", hint: "自分から話すのが好きなタイプ" },
   ],
   sandbox: [
-    { name: "こはる(20)", game: "マインクラフト", comment: "一緒にワールドを作りたくなりそう", style: "curious", hint: "❓質問されると嬉しいタイプ" },
-    { name: "だいち(26)", game: "テラリア", comment: "探索・建築どちらも語れそう", style: "empathy", hint: "👂聞いてほしいタイプ" },
+    { name: "こはる(20)", game: "マインクラフト", comment: "一緒にワールドを作りたくなりそう", style: "curious", hint: "質問されると嬉しいタイプ" },
+    { name: "だいち(26)", game: "テラリア", comment: "探索・建築どちらも語れそう", style: "empathy", hint: "聞いてほしいタイプ" },
   ],
   other: [
-    { name: "みなと(22)", game: "いろいろ遊ぶ", comment: "幅広いジャンルで話が合いそう", style: "share", hint: "💬自分から話すの好きそう" },
+    { name: "みなと(22)", game: "いろいろ遊ぶ", comment: "幅広いジャンルで話が合いそう", style: "share", hint: "自分から話すのが好きなタイプ" },
   ],
 };
 // 各ジャンル3段階の自己開示(1: 軽い本音 → 2: ちょっとした弱音 → 3: 本当の気持ち)。
@@ -298,6 +337,16 @@ const RESPONSE_OPTIONS = [
 
 let state = { shape: "round", color: "#f5c99b", game: "", genreKey: "other" };
 
+const PROGRESS_ORDER = ["setup", "hub", "talk", "result"];
+function setProgress(current) {
+  const currentIndex = PROGRESS_ORDER.indexOf(current);
+  document.querySelectorAll("[data-progress]").forEach(item => {
+    const itemIndex = PROGRESS_ORDER.indexOf(item.dataset.progress);
+    item.classList.toggle("is-current", itemIndex === currentIndex);
+    item.classList.toggle("is-complete", itemIndex < currentIndex);
+  });
+}
+
 document.querySelectorAll("#shape-opts .opt").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll("#shape-opts .opt").forEach(b => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); });
@@ -339,7 +388,7 @@ function detectGenre(text) {
 
 // --- Hub room: 実際にアバターを動かす(2026-07-13 3日目) ---
 const ROOM_W = 560, ROOM_H = 320, AVATAR_R = 16, TALK_DIST = 46;
-const GENRE_BG = { fps: "#241417", fighting: "#241820", puzzle: "#142418", rpg: "#1e1a24", sandbox: "#182418", other: "#181c24" };
+const GENRE_BG = { fps: "#171016", fighting: "#181018", puzzle: "#101711", rpg: "#15121a", sandbox: "#111811", other: "#11140f" };
 let room = { player: { x: 60, y: 160 }, npcs: [], nearNpc: null, keys: {} };
 let roomLoopRunning = false;
 const canvas = document.getElementById("room-canvas");
@@ -370,6 +419,10 @@ function drawShape(x, y, shape, color) {
 function roomLoop() {
   ctx.fillStyle = GENRE_BG[state.genreKey] || GENRE_BG.other;
   ctx.fillRect(0, 0, ROOM_W, ROOM_H);
+  ctx.strokeStyle = "rgba(242,240,232,.07)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= ROOM_W; x += 56) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, ROOM_H); ctx.stroke(); }
+  for (let y = 0; y <= ROOM_H; y += 53) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ROOM_W, y); ctx.stroke(); }
 
   if (!room.paused) {
     const speed = 3;
@@ -392,11 +445,11 @@ function roomLoop() {
     if (isNear) { ctx.save(); ctx.shadowColor = "#6ee7b7"; ctx.shadowBlur = 16; }
     drawShape(n.x, n.y, "round", "#f5a3c7");
     if (isNear) ctx.restore();
-    ctx.fillStyle = "#e6e6e6"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillStyle = "#f2f0e8"; ctx.font = "600 11px sans-serif"; ctx.textAlign = "center";
     ctx.fillText(n.name, n.x, n.y + AVATAR_R + 14);
-    ctx.fillStyle = "#9aa1ac"; ctx.font = "10px sans-serif";
+    ctx.fillStyle = "#9ca095"; ctx.font = "10px sans-serif";
     ctx.fillText(n.game, n.x, n.y + AVATAR_R + 26);
-    ctx.fillStyle = "#f5a3c7"; ctx.font = "10px sans-serif";
+    ctx.fillStyle = "#ff7c96"; ctx.font = "10px sans-serif";
     ctx.fillText(heartsLabel(n.heart), n.x, n.y + AVATAR_R + 39);
   });
 
@@ -441,6 +494,7 @@ enterHubBtn.addEventListener("click", () => {
   document.getElementById("step-result").classList.add("hidden");
   document.getElementById("view-result-btn").classList.add("hidden");
   document.getElementById("step-hub").classList.remove("hidden");
+  setProgress("hub");
   document.getElementById("step-hub").scrollIntoView({ behavior: "smooth" });
   if (!roomLoopRunning) { roomLoopRunning = true; roomLoop(); }
 });
@@ -497,6 +551,7 @@ function startTalk(npc) {
   room.paused = true;
   document.getElementById("talk-title").textContent = `4. ${npc.name}と話す`;
   document.getElementById("step-talk").classList.remove("hidden");
+  setProgress("talk");
   document.getElementById("step-talk").scrollIntoView({ behavior: "smooth" });
   renderTalkChat(npc);
   advanceTalk(npc);
@@ -624,6 +679,7 @@ function showResult() {
   transcriptTitle.textContent = "チャットの様子";
   transcriptDiv.replaceChildren(transcriptTitle, ...best.chatHistory.map(c => createChatMessage(c.name, c.text)));
   document.getElementById("step-result").classList.remove("hidden");
+  setProgress("result");
   document.getElementById("step-result").scrollIntoView({ behavior: "smooth" });
 }
 
@@ -643,6 +699,7 @@ function restartGame() {
   document.getElementById("chat-log").replaceChildren();
   document.getElementById("talk-options").replaceChildren();
   document.getElementById("game-status").textContent = "最初から遊び直せます";
+  setProgress("setup");
   document.getElementById("step-avatar").scrollIntoView({ behavior: "smooth" });
   gameInput.focus({ preventScroll: true });
 }
